@@ -1,3 +1,4 @@
+// src/components/MessageInput.jsx
 import React, { useState } from 'react';
 import { Box, TextField, Button } from '@mui/material';
 
@@ -5,10 +6,9 @@ const MessageInput = ({ onSend }) => {
   const [inputValue, setInputValue] = useState('');
 
   const handleSend = () => {
-    if (inputValue.trim()) {
-      onSend(inputValue);
-      setInputValue('');
-    }
+    if (!inputValue.trim()) return;
+    onSend(inputValue);
+    setInputValue('');
   };
 
   const handleKeyPress = (e) => {
@@ -27,12 +27,7 @@ const MessageInput = ({ onSend }) => {
         onChange={(e) => setInputValue(e.target.value)}
         onKeyPress={handleKeyPress}
       />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSend}
-        sx={{ ml: 1 }}
-      >
+      <Button variant="contained" color="primary" onClick={handleSend} sx={{ ml: 1 }}>
         發送
       </Button>
     </Box>
