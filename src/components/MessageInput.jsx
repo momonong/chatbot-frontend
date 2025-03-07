@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button } from '@mui/material';
 
-const MessageInput = ({ onSend }) => {
+const MessageInput = ({ onSend, disabled }) => {
   const [inputValue, setInputValue] = useState('');
 
   const handleSend = () => {
@@ -22,12 +22,19 @@ const MessageInput = ({ onSend }) => {
       <TextField
         fullWidth
         variant="outlined"
-        placeholder="輸入訊息..."
+        placeholder={disabled ? 'AI 正在思考中，請稍候…' : '輸入訊息...'}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyPress={handleKeyPress}
+        disabled={disabled}
       />
-      <Button variant="contained" color="primary" onClick={handleSend} sx={{ ml: 1 }}>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleSend}
+        sx={{ ml: 1 }}
+        disabled={disabled}
+      >
         發送
       </Button>
     </Box>
@@ -35,3 +42,4 @@ const MessageInput = ({ onSend }) => {
 };
 
 export default MessageInput;
+
