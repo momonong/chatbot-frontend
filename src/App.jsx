@@ -38,7 +38,7 @@ const App = () => {
     setMessages((prev) => [...prev, newAiMessage]);
 
     try {
-      const response = await fetch('/chat', {
+      const response = await fetch('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: messageText }),
