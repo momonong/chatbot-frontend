@@ -5,13 +5,13 @@ import MessageInput from './components/MessageInput';
 
 const App = () => {
   const [messages, setMessages] = useState([
-    { id: 1, text: '您好，請問有什麼可以幫忙的嗎？', isUser: false, finalized: true },
+    { id: 1, text: '歡迎使用 Agent 聊天系統！', isUser: false, finalized: true },
   ]);
 
   // 檢查是否有 AI 還在思考
   const isThinking = messages.some(msg => !msg.isUser && !msg.finalized);
 
-  const handleSendMessage = (messageText) => {
+  const handleSendMessage = async (messageText) => {
     if (!messageText.trim() || isThinking) return; // 如果空白或正在思考，則不執行
 
     // 1. 新增「使用者訊息」
@@ -37,59 +37,44 @@ const App = () => {
     };
     setMessages(prev => [...prev, newAiMessage]);
 
-    // 3. 模擬思考過程
-    setTimeout(() => {
-      console.log('[AI] 第1階段：正在分析使用者訊息...');
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === aiMsgId
-            ? { ...msg, reasoning: [...msg.reasoning, '正在分析使用者訊息...'] }
-            : msg
-        )
-      );
-    }, 2000);
+    try {
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: messageText }),
+      });
 
-    setTimeout(() => {
-      console.log('[AI] 第2階段：判斷可能的回答方向...');
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === aiMsgId
-            ? { ...msg, reasoning: [...msg.reasoning, '判斷可能的回答方向...'] }
-            : msg
-        )
-      );
-    }, 4000);
+      if (!response.body) {
+        console.error("沒有可讀取的回應 stream");
+        return;
+      }
+       
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let done = false;
 
-    setTimeout(() => {
-      console.log('[AI] 第3階段：生成最終回覆中...');
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === aiMsgId
-            ? { ...msg, reasoning: [...msg.reasoning, '生成最終回覆中...'] }
-            : msg
-        )
-      );
-    }, 6000);
+      while (!doen) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        const chunkValue = decoder.decode(value);
+        // 每行都是一個 JSON 字串，分割後更新 state
+        const line = chunkValue.split("\n").filter((line) => line.trim() !== "");
+        for (const line of lines) {
+          try {
+            const msg = JSON.parse(line);
+            // 更新 msg 狀態
+            setMessages((prec) => [...prev, msg]);
+          } catch (error) {
+            console.error("無法解析 JSON 字串", line);
+          }
+        }
+      }
+    }
+    catch (error) {
+      console.error("發生錯誤", error);
+    }
+  }
 
-    // 4. 產生最終回覆
-    setTimeout(() => {
-      console.log('[AI] 最終回覆產生');
-      const endTime = Date.now();
-      const thinkingTime = ((endTime - startTime) / 1000).toFixed(1);
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === aiMsgId
-            ? {
-                ...msg,
-                text: `這是 AI 回覆: ${messageText}`,
-                thinkingTime,
-                finalized: true,
-              }
-            : msg
-        )
-      );
-    }, 8000);
-  };
 
   return (
     <Box
