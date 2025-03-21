@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Paper, Typography, Button } from '@mui/material';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import MarkdownRenderer from './MarkdownRenderer';
 
 const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => {
   const [showReasoning, setShowReasoning] = useState(false);
@@ -31,9 +30,7 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
             whiteSpace: 'pre-wrap',
           }}
         >
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {message}
-          </ReactMarkdown>
+          <MarkdownRenderer content={message} />
         </Paper>
       </Box>
     );
@@ -59,9 +56,7 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
             whiteSpace: 'pre-wrap',
           }}
         >
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {message}
-          </ReactMarkdown>
+          <MarkdownRenderer content={message} />
         </Box>
 
         {/* 顯示思考時間（若有） */}
@@ -94,9 +89,7 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
           </Typography>
           {reasoning.map((step, index) => (
             <Typography key={index} variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {step}
-              </ReactMarkdown>
+              <MarkdownRenderer content={step} />
             </Typography>
           ))}
         </Box>
