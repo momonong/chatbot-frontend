@@ -2,102 +2,72 @@ import React, { useState, useEffect } from 'react';
 import { Box, Paper, Typography, Button } from '@mui/material';
 import MarkdownRenderer from './MarkdownRenderer';
 
+// 將秒數轉換為「X 秒」或「Y 分 Z 秒」格式
+const formatTime = (timeSec) => {
+  const sec = Math.floor(timeSec);
+  if (sec < 60) {
+    return `${sec} 秒`;
+  } else {
+    const minutes = Math.floor(sec / 60);
+    const remain = sec % 60;
+    return `${minutes} 分 ${remain} 秒`;
+  }
+};
+
 const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => {
   const [showReasoning, setShowReasoning] = useState(false);
 
-  // 當尚未產生最終回覆時，自動展開推理過程；最終回覆後預設隱藏
+  // 當 finalized 改變時：未產生最終訊息時，展開所有思考過程；產生最終訊息後，立即收起
   useEffect(() => {
-    if (!finalized) {
-      setShowReasoning(true);
-    } else {
-      setShowReasoning(false);
-    }
+    setShowReasoning(!finalized);
   }, [finalized]);
 
-  // 使用者訊息仍使用氣泡樣式
+  // === 使用者訊息：靠右顯示，並用 maxWidth 控制最大寬度 ===
   if (isUser) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end', 
+          mb: 2, 
+          width: '98%',
+          pr: 1
+        }}
+      >
         <Paper
           elevation={2}
           sx={{
-            p: 1,
-            maxWidth: '70%',
+            p: 2,
             backgroundColor: 'primary.main',
             color: 'primary.contrastText',
             borderRadius: 2,
+            maxWidth: '60%',          // 控制寬度
             wordBreak: 'break-word',
             whiteSpace: 'pre-wrap',
           }}
         >
-          <MarkdownRenderer content={message} />
+          <Typography>{message}</Typography>
         </Paper>
       </Box>
     );
   }
 
-  // AI 訊息：佔滿版面，不使用傳統氣泡背景
+  // === AI 訊息：顯示在左邊 / 佔滿版面 ===
   return (
     <Box sx={{ width: '100%', mb: 2 }}>
-      {/* 顯示思考狀態標籤 */}
-      {!finalized && (
-        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, fontWeight: 'bold' }}>
-          模型正在思考
-        </Typography>
-      )}
-
-      {/* AI 訊息區：不限制寬度，使用透明背景，讓文字佔滿版面 */}
-      <Box sx={{ width: '100%' }}>
-        <Box
-          sx={{
-            p: 2,
-            width: '100%',
-            wordBreak: 'break-word',
-            whiteSpace: 'pre-wrap',
-          }}
-        >
-          <MarkdownRenderer content={message} />
-        </Box>
-
-        {/* 顯示思考時間（若有） */}
-        {finalized && thinkingTime && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-            思考了 {thinkingTime} 秒
+      {/* 上方：顯示「模型正在思考」或「思考了 N」（若已 finalized），以及按鈕（按鈕可手動切換） */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+        {!finalized ? (
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+            模型正在思考
           </Typography>
-        )}
-      </Box>
-
-      {/* 推理過程展示區，僅在需要時顯示 */}
-      {(showReasoning || !finalized) && reasoning && reasoning.length > 0 && (
-        <Box
-          sx={{
-            mt: 1,
-            mb: 2,
-            backgroundColor: 'grey.200',
-            p: 1,
-            borderRadius: 1,
-            wordBreak: 'break-word',
-            whiteSpace: 'pre-wrap',
-          }}
-        >
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ display: 'block', mb: 0.5, fontWeight: 'bold' }}
-          >
-            模型思考過程
+        ) : thinkingTime ? (
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+            思考了 {formatTime(thinkingTime)}
           </Typography>
-          {reasoning.map((step, index) => (
-            <Typography key={index} variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-              <MarkdownRenderer content={step} />
-            </Typography>
-          ))}
-        </Box>
-      )}
+        ) : null}
 
-      {/* 最終回覆後提供切換按鈕 */}
-      {finalized && (
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        {finalized && reasoning && reasoning.length > 0 && (
           <Button
             onClick={() => setShowReasoning((prev) => !prev)}
             size="small"
@@ -106,8 +76,53 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
           >
             {showReasoning ? '隱藏思考過程' : '顯示思考過程'}
           </Button>
-        </Box>
-      )}
+        )}
+      </Box>
+
+      {/* 對話框本體 (AI 回覆氣泡) */}
+      <Paper
+        elevation={2}
+        sx={{
+          p: 2,
+          backgroundColor: 'grey.100',
+          borderRadius: 2,
+          maxWidth: '95%',
+          wordBreak: 'break-word',
+          whiteSpace: 'pre-wrap',
+        }}
+      >
+        {showReasoning && reasoning && reasoning.length > 0 && (
+          <Box
+            sx={{
+              mb: 2,
+              backgroundColor: 'grey.200',
+              p: 1,
+              borderRadius: 1,
+            }}
+          >
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: 'block', mb: 0.5, fontWeight: 'bold' }}
+            >
+              模型思考過程
+            </Typography>
+            {reasoning.map((step, index) => (
+              <Typography
+                key={index}
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: 'block', mb: 0.5 }}
+              >
+                <MarkdownRenderer content={step} />
+              </Typography>
+            ))}
+          </Box>
+        )}
+        <Typography variant="body1">
+          {message}
+        </Typography>
+      </Paper>
     </Box>
   );
 };
