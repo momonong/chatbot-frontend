@@ -21,8 +21,8 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
         <Paper
           elevation={2}
           sx={{
-            p: 2,
-            maxWidth: '60%',
+            p: 1,
+            maxWidth: '70%',
             backgroundColor: 'primary.main',
             color: 'primary.contrastText',
             borderRadius: 2,
