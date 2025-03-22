@@ -91,15 +91,9 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
           whiteSpace: 'pre-wrap',
         }}
       >
-        {showReasoning && reasoning && reasoning.length > 0 && (
-          <Box
-            sx={{
-              mb: 2,
-              backgroundColor: 'grey.200',
-              p: 1,
-              borderRadius: 1,
-            }}
-          >
+        {/* 思考過程標題移到外面 */}
+        {reasoning && reasoning.length > 0 && showReasoning && (
+          <>
             <Typography
               variant="caption"
               color="text.secondary"
@@ -107,21 +101,32 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
             >
               模型思考過程
             </Typography>
-            {reasoning.map((step, index) => (
-              <Typography
-                key={index}
-                variant="caption"
-                color="text.secondary"
-                sx={{ display: 'block', mb: 0.5 }}
-              >
-                <MarkdownRenderer content={step} />
-              </Typography>
-            ))}
-          </Box>
+            <Box
+              sx={{
+                mb: 2,
+                backgroundColor: 'grey.200',
+                p: 1,
+                borderRadius: 1,
+              }}
+            >
+              {reasoning.map((step, index) => (
+                <Typography
+                  key={index}
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: 'block', mb: 0.5 }}
+                >
+                  <MarkdownRenderer content={step} />
+                </Typography>
+              ))}
+            </Box>
+          </>
         )}
-        <Typography variant="body1">
-          {message}
-        </Typography>
+
+        {/* 最終回覆文字 */}
+        <Box sx={{ width: '100%' }}>
+          <MarkdownRenderer content={message} />
+        </Box>
       </Paper>
     </Box>
   );

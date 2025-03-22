@@ -7,48 +7,95 @@ const MarkdownRenderer = ({ content }) => {
   return (
     <Box 
       sx={{
-        width: '100%',  // 確保寬度100%
-        maxWidth: '100%',  // 限制最大寬度
-        overflowX: 'hidden',  // 明確防止水平滾動
+        width: '100%',
+        maxWidth: '100%',
+        overflowX: 'hidden',
+        fontSize: '14px',        // 設置基礎字體大小
         '& *': { 
           overflowWrap: 'break-word', 
           wordBreak: 'break-word',
-          maxWidth: '100%'  // 確保所有子元素不超過
+          maxWidth: '100%',
+          lineHeight: 1.4,       // 減少行高
+          margin: 0,             // 重置所有邊距
+          padding: 0             // 重置所有內邊距
+        },
+        '& p': {
+          marginBottom: '0.3em',  // 段落之間的間距
+          '&:last-child': {
+            marginBottom: 0        // 最後一個段落不需要底部間距
+          }
         },
         '& pre': {
-          overflowX: 'auto',  // 代碼塊允許水平滾動
+          overflowX: 'auto',
           whiteSpace: 'pre',
-          maxWidth: '100%'
+          maxWidth: '100%',
+          margin: '0.6em 0',     // 代碼塊上下間距
+          padding: '0.6em',      // 代碼塊內邊距
+          backgroundColor: '#f6f8fa', // 代碼塊背景色
+          borderRadius: '4px'      // 圓角
         },
         '& code': {
+          fontSize: '13px',        // 代碼字體略小
+          padding: '0.2em 0.4em',  // 行內代碼內邊距
+          backgroundColor: '#f6f8fa', // 行內代碼背景色
+          borderRadius: '3px',     // 行內代碼圓角
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-all'
         },
-        '& img': {  // 控制圖片大小
+        '& ul, & ol': {
+          paddingLeft: '1.2em',    // 列表縮進
+          marginTop: '0em',      // 減少列表頂部間距
+          marginBottom: '0em',   // 減少列表底部間距
+          '& ul, & ol': {         // 處理巢狀列表
+            margin: '0.2em 0'      // 巢狀列表的間距更小
+          }
+        },
+        '& li': {
+          marginBottom: '0em',   // 減少列表項目間距
+          '&:last-child': {
+            marginBottom: 0        // 最後一個項目不需要底部間距
+          },
+          '& p': {                // 處理列表項目中的段落
+            margin: '0em 0',    // 減少段落間距
+            '&:last-child': {
+              marginTop: 0,       // 最後一個段落不需要頂部間距
+              marginBottom: 0
+            }
+          }
+        },
+        '& img': {
           maxWidth: '100%',
-          height: 'auto'
+          height: 'auto',
+          margin: '0.5em 0'      // 圖片上下間距
         },
         '& table': {
           display: 'block',
           overflowX: 'auto',
           maxWidth: '100%',
           borderCollapse: 'collapse',
+          margin: '0.6em 0',     // 表格上下間距
           '& th, & td': {
             border: '1px solid #ddd',
-            padding: '8px',
-            maxWidth: '250px',  // 限制表格單元格寬度
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            padding: '6px 13px',   // 表格單元格內邊距
+            maxWidth: '250px'
           }
         },
         '& blockquote': {
-          borderLeft: '4px solid #ccc',
-          margin: '0',
-          padding: '0 15px',
-          maxWidth: '100%'
+          borderLeft: '3px solid #ddd',
+          margin: '0.6em 0',     // 引用塊上下間距
+          padding: '0 1em',       // 引用塊左右內邊距
+          color: '#666'           // 引用塊文字顏色
         },
         '& a': {
-          wordBreak: 'break-all'
+          color: '#0969da',       // 連結顏色
+          textDecoration: 'none',  // 移除下劃線
+          '&:hover': {
+            textDecoration: 'underline' // 懸停時顯示下劃線
+          }
+        },
+        '& h1, & h2, & h3, & h4, & h5, & h6': {
+          margin: '0.4em 0 0.3em',   // 標題上下間距
+          lineHeight: 1.2          // 標題行高
         }
       }}
     >

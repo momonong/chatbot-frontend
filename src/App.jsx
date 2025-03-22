@@ -38,7 +38,7 @@ const App = () => {
     setMessages((prev) => [...prev, newAiMessage]);
 
     try {
-      const response = await fetch('/chat', {
+      const response = await fetch('http://localhost:8051/api/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: messageText }),
@@ -50,59 +50,60 @@ const App = () => {
       }
 
       const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let done = false;
+      const decoder = new TextDecoder("utf-8");
+      let partialData = "";
+      
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        
+        partialData += decoder.decode(value, { stream: true });
+        const lines = partialData.split('\n');
+        partialData = lines.pop() || '';  // 保留最後一個不完整的行
 
-      while (!done) {
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-        const chunkValue = decoder.decode(value);
-        // 每行都是 JSON 字串，拆分並處理
-        const lines = chunkValue.split('\n').filter((line) => line.trim() !== '');
         for (const line of lines) {
+          if (!line.trim()) continue;
+          
           try {
-            const chunkMsg = JSON.parse(line);
-
-            // 關鍵：更新同一個 AI 訊息
+            const parsed = JSON.parse(line);
+            console.log("收到數據：", parsed);
+            
+            // 更新 messages 狀態
             setMessages((prev) => {
-              // 先複製前狀態
               const newList = [...prev];
-              // 找到我們剛剛新增的 AI 訊息
               const idx = newList.findIndex((m) => m.id === aiMsgId);
-              if (idx < 0) {
-                // 如果找不到，就直接 push
-                // （理論上不應該發生，除非後端發了新的 ID）
-                newList.push(chunkMsg);
-                return newList;
-              }
+              if (idx === -1) return prev;
 
-              // 更新 AI 訊息的屬性
-              if (chunkMsg.reasoning) {
-                // 若後端發送了部分推理步驟，合併進去
-                // 你可以選擇用 concat 或直接替換
-                newList[idx].reasoning = [
-                  ...newList[idx].reasoning,
-                  ...chunkMsg.reasoning,
-                ];
+              const currentMsg = newList[idx];
+              
+              // 如果收到最終消息
+              if (parsed.finalized) {
+                newList[idx] = {
+                  ...currentMsg,
+                  text: parsed.message || '',  // 使用最終消息
+                  // 將新的推理步驟加入現有的推理陣列
+                  reasoning: [...(currentMsg.reasoning || []), ...(parsed.reasoning || [])],
+                  finalized: true,
+                  thinkingTime: ((Date.now() - startTime) / 1000).toFixed(1)
+                };
+              } else {
+                // 累積推理過程
+                newList[idx] = {
+                  ...currentMsg,
+                  reasoning: [...(currentMsg.reasoning || []), ...(parsed.reasoning || [])],
+                  finalized: false
+                };
               }
-              if (typeof chunkMsg.text === 'string') {
-                newList[idx].text = chunkMsg.text;
-              }
-              if (typeof chunkMsg.thinkingTime === 'number') {
-                newList[idx].thinkingTime = chunkMsg.thinkingTime;
-              }
-              if (typeof chunkMsg.finalized === 'boolean') {
-                newList[idx].finalized = chunkMsg.finalized;
-              }
-
+              
               return newList;
             });
+            
           } catch (error) {
-            console.error('無法解析 JSON：', line, error);
+            console.error("解析數據時發生錯誤：", error);
           }
         }
       }
-
+      
       // 最後可計算 AI 的思考時間
       const endTime = Date.now();
       const totalTime = ((endTime - startTime) / 1000).toFixed(1);
