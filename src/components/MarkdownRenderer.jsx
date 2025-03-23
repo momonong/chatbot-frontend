@@ -4,6 +4,14 @@ import remarkGfm from 'remark-gfm';
 import { Box } from '@mui/material';
 
 const MarkdownRenderer = ({ content }) => {
+  // 1) 先做文字替換，把 <stepX> 轉成較適合 Markdown 的形式
+  //   - 這裡示範把 <step1> 變成 "**Step 1**\n\n"
+  //   - 若要更靈活，可加上更多判斷或替換
+  const processedContent = content.replace(
+    /<step(\d+)>/gi, 
+    (_, stepNumber) => `\n\n**Step ${stepNumber}**`
+  );
+
   return (
     <Box 
       sx={{
@@ -100,7 +108,7 @@ const MarkdownRenderer = ({ content }) => {
       }}
     >
       <ReactMarkdown remarkPlugins={[remarkGfm]}>
-        {content}
+        {processedContent}
       </ReactMarkdown>
     </Box>
   );
