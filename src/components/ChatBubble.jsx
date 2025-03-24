@@ -23,6 +23,7 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
   }, [finalized]);
 
   // === 使用者訊息：靠右顯示，並用 maxWidth 控制最大寬度 ===
+  // 使用者訊息泡泡（靠右顯示）
   if (isUser) {
     return (
       <Box 
@@ -31,19 +32,24 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
           justifyContent: 'flex-end', 
           mb: 2, 
           width: '98%',
-          pr: 1
+          pr: { xs: 1, sm: 0 },  // 螢幕小時放大右邊距
         }}
       >
         <Paper
           elevation={2}
           sx={{
             p: 2,
-            backgroundColor: 'primary.main',
-            color: 'primary.contrastText',
+            backgroundColor: '#e0f7fa',   // 修改背景色
+            color: '#006064',             // 修改文字色
             borderRadius: 2,
-            maxWidth: '60%',          // 控制寬度
+            maxWidth: '60%',              // 控制寬度
             wordBreak: 'break-word',
             whiteSpace: 'pre-wrap',
+            // 設定文字選取時的樣式
+            '& ::selection': {
+              backgroundColor: '#80deea',
+              color: '#000',
+            },
           }}
         >
           <Typography>{message}</Typography>
@@ -54,7 +60,14 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
 
   // === AI 訊息：顯示在左邊 / 佔滿版面 ===
   return (
-    <Box sx={{ width: '100%', mb: 2 }}>
+    <Box 
+      sx={{ 
+        width: '100%', 
+        mb: 2, 
+        pl: 1, 
+        pr: { xs: 1, sm: 0 },  // 螢幕小時放大右邊距
+      }}
+    >
       {/* 上方：顯示「模型正在思考」或「思考了 N」（若已 finalized），以及按鈕（按鈕可手動切換） */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
         {!finalized ? (
@@ -86,11 +99,13 @@ const ChatBubble = ({ message, isUser, reasoning, thinkingTime, finalized }) => 
           p: 2,
           backgroundColor: 'grey.100',
           borderRadius: 2,
-          maxWidth: '95%',
+          maxWidth: "98%", 
           wordBreak: 'break-word',
           whiteSpace: 'pre-wrap',
+          boxSizing: 'border-box', // 確保內邊距被包含在寬度內
         }}
       >
+
         {/* 思考過程標題移到外面 */}
         {reasoning && reasoning.length > 0 && showReasoning && (
           <>
