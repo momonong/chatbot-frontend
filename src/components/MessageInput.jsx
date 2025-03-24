@@ -1,4 +1,3 @@
-// src/components/MessageInput.jsx
 import React, { useState } from 'react';
 import { Box, TextField, Button } from '@mui/material';
 
@@ -11,10 +10,17 @@ const MessageInput = ({ onSend, disabled }) => {
     setInputValue('');
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+  /**
+   * 監聽鍵盤事件：
+   * - Shift + Enter => 插入換行
+   * - Enter => 送出訊息
+   */
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // 避免 TextField 自動換行
       handleSend();
     }
+    // 若是 Shift+Enter，則保持預設行為（換行）
   };
 
   return (
@@ -22,11 +28,21 @@ const MessageInput = ({ onSend, disabled }) => {
       <TextField
         fullWidth
         variant="outlined"
-        placeholder={disabled ? 'AI 正在思考中，請稍候…' : '輸入訊息...'}
+        multiline         // 開啟多行模式
+        minRows={1}         // 初始顯示 1 行
+        maxRows={10}     // 最多自動撐高到 10 行
+        placeholder={
+          disabled
+            ? 'AI 正在思考中，請稍候…'
+            : '輸入訊息 (Enter 送出, Shift+Enter 換行)...'
+        }
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        onKeyPress={handleKeyPress}
+        onKeyDown={handleKeyDown}
         disabled={disabled}
+        sx={{
+          // 這裡可根據需求進一步自訂樣式
+        }}
       />
       <Button
         variant="contained"
@@ -42,4 +58,3 @@ const MessageInput = ({ onSend, disabled }) => {
 };
 
 export default MessageInput;
-
