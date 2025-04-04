@@ -5,16 +5,23 @@ import { Box } from '@mui/material';
 import 'github-markdown-css';
 
 const MarkdownRenderer = ({ content = '' }) => {
-  const processedContent = (typeof content === 'string' ? content : '').replace(
+  // 先進行自訂替換，例如把 <stepX> 轉成 Markdown 格式
+  let processedContent = (typeof content === 'string' ? content : '').replace(
     /<step(\d+)>/gi, 
     (_, stepNumber) => `\n\n**Step ${stepNumber}**`
   );
-
+  
+  // 根據需求移除或壓縮換行符號
+  // 若要完全移除換行符號：
+  processedContent = processedContent.replace(/\n/g, ' \n ');
+  
+  // 若要壓縮多餘的換行符號：
+  processedContent = processedContent.replace(/\n{2,}/g, '\n');
+  
   return (
     <Box 
-      className="markdown-body"  // 讓外層容器套用 GitHub Markdown CSS
+      className="markdown-body"
       sx={{
-        // 可在這裡進一步自訂樣式，例如調整字體大小、行高等
         fontSize: '14px',
         overflowX: 'hidden',
         backgroundColor: 'transparent',
